@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "675266056865",
+    "project_id": "word-shatter",
+    "storage_bucket": "word-shatter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:675266056865:android:c73caa5793a27cfab916e0",
+        "android_client_info": {
+          "package_name": "com.word.block.puzzles.search.words.v2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "675266056865-vh9pfip71jf0enqbf8rgms1k4aagioi0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBssLpqzoKthpwihPjhSR6Zm67AQHJd2oQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "675266056865-vh9pfip71jf0enqbf8rgms1k4aagioi0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

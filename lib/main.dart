@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:pikachu/app_assets.dart';
 
 //import 'package:word_puzzle/words_helper.dart';
@@ -11,6 +12,9 @@ import 'dart:async';
 
 import 'package:pikachu/imagehelper.dart';
 
+import 'ad_manager.dart';
+import 'ads/app_lifecircle_factory.dart';
+import 'ads/open_app_ads_manage.dart';
 import 'dimens.dart';
 
 class Todo {
@@ -20,9 +24,15 @@ class Todo {
   Todo(this.title, this.description);
 }
 
-void main() {
+void initAds() async{
+  await MobileAds.instance.initialize();
+}
+
+void main(){
+  WidgetsFlutterBinding.ensureInitialized();
   FlutterStatusbarcolor.setStatusBarColor(Colors.transparent);
   FlutterStatusbarcolor.setStatusBarWhiteForeground(false);
+  initAds();
   runApp(MaterialApp(
     title: 'Word Puzzle',
     home: SelectWidget(),
@@ -43,6 +53,8 @@ class _SelectWidgetState extends State<SelectWidget> {
   List<ACategory>? categories;
   List<List<AWord>> allWords = [];
   List<Color> colorList = [];
+  BannerAd? _bannerAd;
+  InterstitialAd? _interstitialAd;
 
   getHeightWidth(context) {
     deviceWidth = MediaQuery.of(context).size.width;
@@ -58,6 +70,65 @@ class _SelectWidgetState extends State<SelectWidget> {
               bestTime: categories![index].time ?? '')),
     );
     setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    initAds();
+    _loadInterstitialAd();
+    super.initState();
+  }
+
+  initAds() {
+    BannerAd(
+      adUnitId: AdManager.bannerAdUnitId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdManager.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              //kakak
+            },
+          );
+
+          setState(() {
+            _interstitialAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    // TODO: Dispose a BannerAd object
+    _bannerAd?.dispose();
+    _interstitialAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -77,76 +148,95 @@ class _SelectWidgetState extends State<SelectWidget> {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             return Scaffold(
-              body: ListView.builder(
-                itemCount: categories!.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                      height: 100,
-                      color: Colors.white,
-                      child: Card(
-                        child: InkWell(
-                          onTap: () {
-                            _navigateAndDisplaySelection(context, index);
-                          },
-                          hoverColor: Colors.blue,
-                          child: Container(
-                            margin:
-                                const EdgeInsets.only(left: 3.0, right: 3.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: colorList[index % colorList.length],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Row(children: <Widget>[
-                                    Text(categories![index].category ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 25.0,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ))
-                                  ]),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          const Icon(IconData(57746,fontFamily: 'MaterialIcons'),
-                                              color: Colors.white),
-                                          const Text("   "),
-                                          Text(categories![index].time ?? '',
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  color: Colors.white)),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          const Icon(IconData(58683, fontFamily: 'MaterialIcons'),
-                                              color: Colors.white),
-                                          Text(
-                                              allWords[index].length.toString(),
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  color: Colors.white)),
-                                          const Text("   "),
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                ],
+              body: Column(children: [
+                if (_bannerAd != null)
+                  const SizedBox(height: kToolbarHeight,),
+                if (_bannerAd != null)
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: _bannerAd!.size.width.toDouble(),
+                      height: _bannerAd!.size.height.toDouble(),
+                      child: AdWidget(ad: _bannerAd!),
+                    ),
+                  ),
+                Expanded(child: ListView.builder(
+                  itemCount: categories!.length,
+                  padding: EdgeInsets.zero,
+                  itemBuilder: (context, index) {
+                    return Container(
+                        height: 100,
+                        color: Colors.white,
+                        child: Card(
+                          child: InkWell(
+                            onTap: () {
+                              if(_interstitialAd != null){
+                                _interstitialAd?.show();
+                                _navigateAndDisplaySelection(context, index);
+                              }else{
+                                _navigateAndDisplaySelection(context, index);
+                              }
+                            },
+                            hoverColor: Colors.blue,
+                            child: Container(
+                              margin:
+                              const EdgeInsets.only(left: 3.0, right: 3.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: colorList[index % colorList.length],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Row(children: <Widget>[
+                                      Text(categories![index].category ?? '',
+                                          style: const TextStyle(
+                                            fontSize: 25.0,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ))
+                                    ]),
+                                    Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Row(
+                                          children: <Widget>[
+                                            const Icon(IconData(57746,fontFamily: 'MaterialIcons'),
+                                                color: Colors.white),
+                                            const Text("   "),
+                                            Text(categories![index].time ?? '',
+                                                style: const TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.white)),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: <Widget>[
+                                            const Icon(IconData(58683, fontFamily: 'MaterialIcons'),
+                                                color: Colors.white),
+                                            Text(
+                                                allWords[index].length.toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.white)),
+                                            const Text("   "),
+                                          ],
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ));
-                },
-              ),
+                        ));
+                  },
+                ))
+              ],) ,
             );
           }
         }
@@ -201,6 +291,7 @@ class GameWidget extends StatefulWidget {
 }
 
 class _GameWidgetState extends State<GameWidget> {
+
   int? gridW;
   int? gridH;
   List<String> wordsList = [];
@@ -219,6 +310,7 @@ class _GameWidgetState extends State<GameWidget> {
   bool isActive = false;
   Timer? timer;
 
+
   void handleTick() {
     setState(() {
       secondsPassed = secondsPassed + 1;
@@ -230,15 +322,17 @@ class _GameWidgetState extends State<GameWidget> {
     helper.updateBestTime(widget.category ?? '', secondsPassed);
     timer?.cancel();
 
-    Navigator.pop(
-        context, ACategory.withTime(widget.category, secondsPassed.toString()));
-    showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-              title: const Text("Congratulations!"),
-              content: Text(
-                  "Your Score is ${secondsPassed ~/ 60} m ${secondsPassed % 60} s"),
-            ));
+    _rewardedAd?.show(onUserEarnedReward: (a,b){
+      Navigator.pop(
+          context, ACategory.withTime(widget.category, secondsPassed.toString()));
+      showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Congratulations!"),
+            content: Text(
+                "Your Score is ${secondsPassed ~/ 60} m ${secondsPassed % 60} s"),
+          ));
+    });
   }
 
   void _incrementDown(PointerEvent details) {
@@ -306,6 +400,7 @@ class _GameWidgetState extends State<GameWidget> {
     Offset position = renderBox.localToGlobal(Offset.zero);
     return position;
   }
+  RewardedAd? _rewardedAd;
 
   @override
   void initState() {
@@ -314,7 +409,37 @@ class _GameWidgetState extends State<GameWidget> {
     foundColor.clear();
     foundWords.clear();
     touchItems.clear();
+    _loadRewardedAd();
+    AppOpenAdManager appOpenAdManager = AppOpenAdManager()..loadAd();
+    AppLifecycleReactor(appOpenAdManager: appOpenAdManager)
+        .listenToAppStateChanges();
     _initializeGame();
+  }
+
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: AdManager.rewardedAdUnitId,
+      request: AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              setState(() {
+                ad.dispose();
+                _rewardedAd = null;
+              });
+              _loadRewardedAd();
+            },
+          );
+          setState(() {
+            _rewardedAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load a rewarded ad: ${err.message}');
+        },
+      ),
+    );
   }
 
   @override
@@ -587,6 +712,7 @@ class _GameWidgetState extends State<GameWidget> {
 
   @override
   void dispose() {
+    _rewardedAd?.dispose();
     if (timer != null) timer?.cancel();
     super.dispose();
   }
