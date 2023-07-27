@@ -322,17 +322,16 @@ class _GameWidgetState extends State<GameWidget> {
     helper.updateBestTime(widget.category ?? '', secondsPassed);
     timer?.cancel();
 
-    _rewardedAd?.show(onUserEarnedReward: (a,b){
-      Navigator.pop(
-          context, ACategory.withTime(widget.category, secondsPassed.toString()));
-      showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text("Congratulations!"),
-            content: Text(
-                "Your Score is ${secondsPassed ~/ 60} m ${secondsPassed % 60} s"),
-          ));
-    });
+    _interstitialAd?.show();
+    Navigator.pop(
+        context, ACategory.withTime(widget.category, secondsPassed.toString()));
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Congratulations!"),
+          content: Text(
+              "Your Score is ${secondsPassed ~/ 60} m ${secondsPassed % 60} s"),
+        ));
   }
 
   void _incrementDown(PointerEvent details) {
@@ -400,7 +399,7 @@ class _GameWidgetState extends State<GameWidget> {
     Offset position = renderBox.localToGlobal(Offset.zero);
     return position;
   }
-  RewardedAd? _rewardedAd;
+  InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
@@ -409,34 +408,31 @@ class _GameWidgetState extends State<GameWidget> {
     foundColor.clear();
     foundWords.clear();
     touchItems.clear();
-    _loadRewardedAd();
+    _loadInterstitialAd();
     AppOpenAdManager appOpenAdManager = AppOpenAdManager()..loadAd();
     AppLifecycleReactor(appOpenAdManager: appOpenAdManager)
         .listenToAppStateChanges();
     _initializeGame();
   }
 
-  void _loadRewardedAd() {
-    RewardedAd.load(
-      adUnitId: AdManager.rewardedAdUnitId,
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdManager.interstitialAdUnitId,
       request: AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
+      adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
-              setState(() {
-                ad.dispose();
-                _rewardedAd = null;
-              });
-              _loadRewardedAd();
+              //kakak
             },
           );
+
           setState(() {
-            _rewardedAd = ad;
+            _interstitialAd = ad;
           });
         },
         onAdFailedToLoad: (err) {
-          print('Failed to load a rewarded ad: ${err.message}');
+          print('Failed to load an interstitial ad: ${err.message}');
         },
       ),
     );
@@ -712,7 +708,7 @@ class _GameWidgetState extends State<GameWidget> {
 
   @override
   void dispose() {
-    _rewardedAd?.dispose();
+    _interstitialAd?.dispose();
     if (timer != null) timer?.cancel();
     super.dispose();
   }

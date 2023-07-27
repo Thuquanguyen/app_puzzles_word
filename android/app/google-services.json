@@ -1,38 +1,39 @@
 {
   "project_info": {
-    "project_number": "675266056865",
-    "project_id": "word-shatter",
-    "storage_bucket": "word-shatter.appspot.com"
+    "project_number": "569954749397",
+    "project_id": "word-shatter-word-mobile",
+    "storage_bucket": "word-shatter-word-mobile.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:675266056865:android:c73caa5793a27cfab916e0",
+        "mobilesdk_app_id": "1:569954749397:android:6a52f7cab367d088d04b5c",
         "android_client_info": {
           "package_name": "com.word.block.puzzles.search.words.v2"
         }
       },
       "oauth_client": [
         {
-          "client_id": "675266056865-vh9pfip71jf0enqbf8rgms1k4aagioi0.apps.googleusercontent.com",
+          "client_id": "569954749397-pnqvqutm59ifok28j5orq3n9sugka7uf.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBssLpqzoKthpwihPjhSR6Zm67AQHJd2oQ"
+          "current_key": "AIzaSyDbEkBQQO_eZJRHrQigXr7a5DAB-nqfrDM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "675266056865-vh9pfip71jf0enqbf8rgms1k4aagioi0.apps.googleusercontent.com",
+              "client_id": "569954749397-pnqvqutm59ifok28j5orq3n9sugka7uf.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-5379224969805616~9653490821"
     }
   ],
   "configuration_version": "1"
