@@ -149,17 +149,17 @@ class _SelectWidgetState extends State<SelectWidget> {
           } else {
             return Scaffold(
               body: Column(children: [
-                if (_bannerAd != null)
+                // if (_bannerAd != null)
                   const SizedBox(height: kToolbarHeight,),
-                if (_bannerAd != null)
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: SizedBox(
-                      width: _bannerAd!.size.width.toDouble(),
-                      height: _bannerAd!.size.height.toDouble(),
-                      child: AdWidget(ad: _bannerAd!),
-                    ),
-                  ),
+                // if (_bannerAd != null)
+                //   Align(
+                //     alignment: Alignment.topCenter,
+                //     child: SizedBox(
+                //       width: _bannerAd!.size.width.toDouble(),
+                //       height: _bannerAd!.size.height.toDouble(),
+                //       child: AdWidget(ad: _bannerAd!),
+                //     ),
+                //   ),
                 Expanded(child: ListView.builder(
                   itemCount: categories!.length,
                   padding: EdgeInsets.zero,
@@ -170,12 +170,13 @@ class _SelectWidgetState extends State<SelectWidget> {
                         child: Card(
                           child: InkWell(
                             onTap: () {
-                              if(_interstitialAd != null){
-                                _interstitialAd?.show();
-                                _navigateAndDisplaySelection(context, index);
-                              }else{
-                                _navigateAndDisplaySelection(context, index);
-                              }
+                              // if(_interstitialAd != null){
+                              //   _interstitialAd?.show();
+                              //   _navigateAndDisplaySelection(context, index);
+                              // }else{
+                              //   _navigateAndDisplaySelection(context, index);
+                              // }
+                              _navigateAndDisplaySelection(context, index);
                             },
                             hoverColor: Colors.blue,
                             child: Container(
@@ -322,7 +323,7 @@ class _GameWidgetState extends State<GameWidget> {
     helper.updateBestTime(widget.category ?? '', secondsPassed);
     timer?.cancel();
 
-    _interstitialAd?.show();
+    // _interstitialAd?.show();
     Navigator.pop(
         context, ACategory.withTime(widget.category, secondsPassed.toString()));
     showDialog(
